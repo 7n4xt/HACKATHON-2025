@@ -26,7 +26,7 @@ const audioSystem = {
         resume: new Audio('../assets/sounds/resume.mp3')
     },
     bgMusic: new Audio('../assets/sounds/background-music.mp3'),
-    
+
     playSound(soundName) {
         if (gameState.soundEnabled && this.sounds[soundName]) {
             // Reset the sound to beginning and play
@@ -35,7 +35,7 @@ const audioSystem = {
             sound.play().catch(e => console.log("Audio play error:", e));
         }
     },
-    
+
     playMusic() {
         if (gameState.music) {
             this.bgMusic.loop = true;
@@ -43,11 +43,11 @@ const audioSystem = {
             this.bgMusic.play().catch(e => console.log("Audio play error:", e));
         }
     },
-    
+
     pauseMusic() {
         this.bgMusic.pause();
     },
-    
+
     resumeMusic() {
         if (gameState.music) {
             this.bgMusic.play().catch(e => console.log("Audio play error:", e));
