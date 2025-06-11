@@ -453,10 +453,13 @@ footer {
     background: var(--panel-bg);
     border-top: 4px solid var(--dark-color);
     font-size: 0.8rem;
-    margin-top: 3rem;
     font-family: 'Press Start 2P', monospace;
     color: var(--dark-color);
-    position: relative;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    z-index: 100;
     box-shadow: 0 -4px 0 var(--shadow-color);
 }
 
