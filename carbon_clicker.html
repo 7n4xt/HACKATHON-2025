@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carbon Clicker - Save the City!</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="main.js" defer></script>
+</head>
+
+<body>
+    <div class="game-container">
+        <!-- Stats Bar -->
+        <div class="stats-bar">
+            <div class="stats-item">
+                <span>🏭</span>
+                <span>CO₂:</span>
+                <span class="stats-value co2-value" id="co2-counter">1200</span>
+                <span>tons/day</span>
+            </div>
+            <div class="stats-item">
+                <span>🌿</span>
+                <span>Green Points:</span>
+                <span class="stats-value gp-value" id="gp-counter">10</span>
+            </div>
+            <div class="stats-item">
+                <span>⏱️</span>
+                <span>Time:</span>
+                <span class="stats-value time-value" id="time-counter">10:00</span>
+            </div>
+        </div>
+
+        <!-- Upgrade Categories -->
+        <div class="categories">
+            <button class="category-button active" data-category="all">
+                <span class="category-emoji">🌍</span>
+                <span>All Upgrades</span>
+            </button>
+            <button class="category-button" data-category="nature">
+                <span class="category-emoji">🌱</span>
+                <span>Nature & Biodiversity</span>
+            </button>
+            <button class="category-button" data-category="energy">
+                <span class="category-emoji">⚡</span>
+                <span>Renewable Energy</span>
+            </button>
+            <button class="category-button" data-category="transport">
+                <span class="category-emoji">🚊</span>
+                <span>Sustainable Transport</span>
+            </button>
+            <button class="category-button" data-category="buildings">
+                <span class="category-emoji">🏢</span>
+                <span>Green Buildings</span>
+            </button>
+            <button class="category-button" data-category="waste">
+                <span class="category-emoji">♻️</span>
+                <span>Waste & Circular Economy</span>
+            </button>
+            <button class="category-button" data-category="water">
+                <span class="category-emoji">💧</span>
+                <span>Water Management</span>
+            </button>
+            <button class="category-button" data-category="smart">
+                <span class="category-emoji">🧠</span>
+                <span>Smart City Tech</span>
+            </button>
+            <button class="category-button" data-category="carbon">
+                <span class="category-emoji">🌍</span>
+                <span>Carbon Capture & Advanced</span>
+            </button>
+        </div>
+
+        <!-- City View -->
+        <div class="city-view-container" id="city-container">
+            <div class="city-view"></div>
+            <div class="city-pollution" id="pollution-overlay"></div>
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="co2-progress"></div>
+                <div class="progress-text">0%</div>
+            </div>
+        </div>
+
+        <!-- Upgrades Panel -->
+        <div class="upgrades-panel">
+            <div class="upgrade-list" id="upgrades-list">
+                <!-- Upgrades will be dynamically inserted here -->
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>Carbon Clicker 🌍 Save the city one click at a time!</p>
+        </div>
+    </div>
+
+    <!-- Victory Modal -->
+    <div class="modal-overlay victory-modal" id="victory-modal">
+        <div class="modal">
+            <div class="modal-emoji">🏆</div>
+            <h2>Victory!</h2>
+            <p>Congratulations! You've successfully reduced the city's carbon emissions to zero!</p>
+            <div class="stats-details">
+                <p>🕒 Time Remaining: <span id="victory-time">0:00</span></p>
+                <p>🌿 Green Points Earned: <span id="victory-points">0</span></p>
+                <p>🌍 Total Upgrades Purchased: <span id="victory-upgrades">0</span></p>
+            </div>
+            <button class="modal-button" id="play-again-victory">Play Again</button>
+        </div>
+    </div>
+
+    <!-- Game Over Modal -->
+    <div class="modal-overlay gameover-modal" id="gameover-modal">
+        <div class="modal">
+            <div class="modal-emoji">⏱️</div>
+            <h2>Time's Up!</h2>
+            <p>You didn't manage to reduce the carbon emissions to zero in time.</p>
+            <div class="stats-details">
+                <p>🏭 Remaining CO₂: <span id="gameover-co2">0</span> tons/day</p>
+                <p>🌿 Green Points Earned: <span id="gameover-points">0</span></p>
+                <p>📊 Reduction Achieved: <span id="gameover-percentage">0</span>%</p>
+            </div>
+            <button class="modal-button" id="play-again-gameover">Try Again</button>
+        </div>
+    </div>
+</body>
+
+</html>
