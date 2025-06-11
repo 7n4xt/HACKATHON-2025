@@ -1,13 +1,12 @@
-
 // Game state
 const gameState = {
-    co2: 1200,
-    initialCo2: 1200,
+    co2: 600,
+    initialCo2: 600,
     greenPoints: 10,
     clickPower: 1,
     passiveIncome: 0,
-    timeRemaining: 600, // 10 minutes in seconds
-    gameActive: false,
+    timeRemaining: 180, // 2 minutes in seconds
+    gameActive: true,
     timerInterval: null,
     totalUpgradesPurchased: 0,
     upgradesOwned: {}
@@ -139,15 +138,19 @@ const gameoverModal = document.getElementById('gameover-modal');
 const playAgainVictory = document.getElementById('play-again-victory');
 const playAgainGameover = document.getElementById('play-again-gameover');
 
+// Add a variable to track last click power threshold
+let lastClickPowerThreshold = 0;
+
 // Initialize the game
 function initGame() {
     // Reset game state
-    gameState.co2 = 1200;
-    gameState.initialCo2 = 1200;
+    gameState.co2 = 600;
+    gameState.initialCo2 = 600;
     gameState.greenPoints = 10;
     gameState.clickPower = 1;
+    lastClickPowerThreshold = 0;
     gameState.passiveIncome = 0;
-    gameState.timeRemaining = 600;
+    gameState.timeRemaining = 120; // 2 minutes in seconds
     gameState.gameActive = true;
     gameState.totalUpgradesPurchased = 0;
     gameState.upgradesOwned = {};
@@ -260,9 +263,11 @@ function buyUpgrade(upgradeId) {
         // Deduct points
         gameState.greenPoints -= currentCost;
 
-        // Apply upgrade effect
-        gameState.co2 -= upgrade.effect;
-        if (gameState.co2 < 0) gameState.co2 = 0;
+        // Award green points (10% of cost)
+        const gpReward = Math.floor(currentCost * 0.1);
+        gameState.greenPoints += gpReward;
+        showGreenPointEffect(gpReward, upgradeId);
+        showUpgradeBurstEffect(upgradeId);
 
         // Increase count
         gameState.upgradesOwned[upgradeId] = (gameState.upgradesOwned[upgradeId] || 0) + 1;
@@ -279,7 +284,6 @@ function buyUpgrade(upgradeId) {
         costElement.textContent = nextCost;
 
         // Add passive income if applicable
-        // For simplicity, let's give a small passive income bonus for each upgrade
         gameState.passiveIncome += upgrade.effect * 0.01;
 
         // Create upgrade animation
@@ -295,6 +299,35 @@ function buyUpgrade(upgradeId) {
             victory();
         }
     }
+}
+
+// Show floating green point effect when upgrade is bought
+function showGreenPointEffect(amount, upgradeId) {
+    const upgradeElement = document.querySelector(`.upgrade-item[data-id="${upgradeId}"]`);
+    if (!upgradeElement) return;
+    const effect = document.createElement('div');
+    effect.className = 'gp-float-effect';
+    effect.textContent = `+${amount} 🌿`;
+    upgradeElement.appendChild(effect);
+    setTimeout(() => {
+        effect.style.opacity = '0';
+        effect.style.transform = 'translateY(-40px) scale(1.5)';
+    }, 50);
+    setTimeout(() => {
+        if (effect.parentNode) effect.parentNode.removeChild(effect);
+    }, 1200);
+}
+
+// Show burst effect around upgrade button
+function showUpgradeBurstEffect(upgradeId) {
+    const upgradeElement = document.querySelector(`.upgrade-item[data-id="${upgradeId}"] .upgrade-button`);
+    if (!upgradeElement) return;
+    const burst = document.createElement('div');
+    burst.className = 'upgrade-burst-effect';
+    upgradeElement.appendChild(burst);
+    setTimeout(() => {
+        if (burst.parentNode) burst.parentNode.removeChild(burst);
+    }, 600);
 }
 
 // City click handler
@@ -370,10 +403,33 @@ function startTimer() {
         // Add passive income
         if (gameState.passiveIncome > 0) {
             gameState.greenPoints += gameState.passiveIncome;
-            updateCounters();
         }
 
-        // Update timer display
+        // Apply ongoing upgrade effects (CO2 reduction per second)
+        let totalUpgradeEffect = 0;
+        for (const upgradeId in gameState.upgradesOwned) {
+            const count = gameState.upgradesOwned[upgradeId];
+            if (count > 0) {
+                const upgrade = allUpgrades.find(u => u.id === upgradeId);
+                if (upgrade) {
+                    totalUpgradeEffect += upgrade.effect * count;
+                }
+            }
+        }
+        gameState.co2 -= totalUpgradeEffect / 60; // Convert per day to per second (assuming 1 tick = 1 second)
+        if (gameState.co2 < 0) gameState.co2 = 0;
+
+        // Update click power if pollution reduced by another 2.5%
+        const progress = 1 - (gameState.co2 / gameState.initialCo2);
+        const threshold = Math.floor(progress * 40); // 40 steps of 2.5%
+        if (threshold > lastClickPowerThreshold) {
+            gameState.clickPower *= 2;
+            lastClickPowerThreshold = threshold;
+        }
+
+        updateCounters();
+        updatePollutionOverlay();
+        updateProgressBar();
         updateTimeDisplay();
 
         // Check if time's up
@@ -382,6 +438,11 @@ function startTimer() {
             gameState.timeRemaining = 0;
             updateTimeDisplay();
             gameOver();
+        }
+        // Check for victory
+        if (gameState.co2 <= 0) {
+            clearInterval(gameState.timerInterval);
+            victory();
         }
     }, 1000);
 }
@@ -428,6 +489,23 @@ function updateUpgradeButtons() {
 function updatePollutionOverlay() {
     const progress = 1 - (gameState.co2 / gameState.initialCo2);
     pollutionOverlay.style.opacity = 0.6 - (progress * 0.6);
+
+    // Dynamic pollution photo
+    const pollutionPhoto = document.getElementById('pollution-photo');
+    if (pollutionPhoto) {
+        let src = '';
+        if (progress < 0.33) {
+            // High pollution
+            src = 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80'; // Smoggy city
+        } else if (progress < 0.66) {
+            // Medium pollution
+            src = 'https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=400&q=80'; // Somewhat clear
+        } else {
+            // Low pollution
+            src = 'https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80'; // Clean city
+        }
+        pollutionPhoto.src = src;
+    }
 }
 
 // Update progress bar
