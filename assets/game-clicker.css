@@ -75,6 +75,24 @@ body {
     z-index: 100;
 }
 
+.pause-button {
+    background: var(--dark-color);
+    color: white;
+    border: 3px solid var(--dark-color);
+    border-radius: 0;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.pause-button:hover {
+    background: var(--light-color);
+    color: var(--dark-color);
+    transform: translateY(-2px);
+}
+
 .stats-item {
     display: flex;
     align-items: center;
@@ -454,6 +472,17 @@ body {
     box-shadow: none;
 }
 
+.pause-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.secondary-button {
+    background: var(--light-color);
+    color: var(--dark-color);
+}
+
 .stats-details {
     background: var(--panel-bg);
     padding: 15px;
@@ -495,16 +524,16 @@ body {
 
 .pollution-photo {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 110%;
-    height: 110%;
+    top: -25%;
+    left: -25%;
+    width: 150%;
+    height: 150%;
     max-width: none;
     max-height: none;
     object-fit: cover;
     z-index: 1;
     pointer-events: none;
-    opacity: 0.85;
+    opacity: 0.95;
     transition: opacity 0.5s, width 0.5s, height 0.5s;
 }
 
@@ -552,4 +581,30 @@ body {
         transform: translate(-50%, -50%) scale(1.5);
         opacity: 0;
     }
+}
+
+/* Override styles for website integration */
+.game-container {
+    background-color: transparent;
+    margin-top: 20px;
+}
+
+/* Make sure the game container is properly visible inside the main content */
+main .game-container {
+    min-height: calc(100vh - 200px);
+    padding-bottom: 50px;
+}
+
+/* Make sure the game's font styles don't affect the rest of the site */
+header,
+footer,
+nav {
+    font-family: 'Inter', Arial, sans-serif !important;
+}
+
+/* Reset header and footer to match site styles */
+header *,
+footer * {
+    font-family: 'Inter', Arial, sans-serif !important;
+    image-rendering: auto;
 }

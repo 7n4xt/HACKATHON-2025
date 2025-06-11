@@ -7,9 +7,52 @@ const gameState = {
     passiveIncome: 0,
     timeRemaining: 180, // 2 minutes in seconds
     gameActive: true,
+    isPaused: false,
     timerInterval: null,
     totalUpgradesPurchased: 0,
-    upgradesOwned: {}
+    upgradesOwned: {},
+    soundEnabled: true, // Sound effects toggle
+    music: true // Background music toggle
+};
+
+// Audio system
+const audioSystem = {
+    sounds: {
+        click: new Audio('../assets/sounds/click.mp3'),
+        upgrade: new Audio('../assets/sounds/upgrade.mp3'),
+        victory: new Audio('../assets/sounds/victory.mp3'),
+        gameOver: new Audio('../assets/sounds/game-over.mp3'),
+        pause: new Audio('../assets/sounds/pause.mp3'),
+        resume: new Audio('../assets/sounds/resume.mp3')
+    },
+    bgMusic: new Audio('../assets/sounds/background-music.mp3'),
+    
+    playSound(soundName) {
+        if (gameState.soundEnabled && this.sounds[soundName]) {
+            // Reset the sound to beginning and play
+            const sound = this.sounds[soundName];
+            sound.currentTime = 0;
+            sound.play().catch(e => console.log("Audio play error:", e));
+        }
+    },
+    
+    playMusic() {
+        if (gameState.music) {
+            this.bgMusic.loop = true;
+            this.bgMusic.volume = 0.3; // Lower volume for background music
+            this.bgMusic.play().catch(e => console.log("Audio play error:", e));
+        }
+    },
+    
+    pauseMusic() {
+        this.bgMusic.pause();
+    },
+    
+    resumeMusic() {
+        if (gameState.music) {
+            this.bgMusic.play().catch(e => console.log("Audio play error:", e));
+        }
+    }
 };
 
 // Upgrade categories
@@ -135,6 +178,10 @@ const upgradesList = document.getElementById('upgrades-list');
 const categoryButtons = document.querySelectorAll('.category-button');
 const victoryModal = document.getElementById('victory-modal');
 const gameoverModal = document.getElementById('gameover-modal');
+const pauseModal = document.getElementById('pause-modal');
+const pauseButton = document.getElementById('pause-button');
+const resumeButton = document.getElementById('resume-button');
+const restartButton = document.getElementById('restart-button');
 const playAgainVictory = document.getElementById('play-again-victory');
 const playAgainGameover = document.getElementById('play-again-gameover');
 
@@ -152,6 +199,7 @@ function initGame() {
     gameState.passiveIncome = 0;
     gameState.timeRemaining = 120; // 2 minutes in seconds
     gameState.gameActive = true;
+    gameState.isPaused = false;
     gameState.totalUpgradesPurchased = 0;
     gameState.upgradesOwned = {};
 
@@ -174,6 +222,7 @@ function initGame() {
     // Hide modals
     victoryModal.classList.remove('active');
     gameoverModal.classList.remove('active');
+    pauseModal.classList.remove('active');
 }
 
 // Initialize upgrades
@@ -289,6 +338,9 @@ function buyUpgrade(upgradeId) {
         // Create upgrade animation
         createUpgradeAnimation(upgrade.emoji);
 
+        // Play upgrade sound
+        audioSystem.playSound('upgrade');
+
         // Update UI
         updateCounters();
         updatePollutionOverlay();
@@ -332,7 +384,7 @@ function showUpgradeBurstEffect(upgradeId) {
 
 // City click handler
 function handleCityClick(event) {
-    if (!gameState.gameActive) return;
+    if (!gameState.gameActive || gameState.isPaused) return;
 
     // Add green points
     gameState.greenPoints += gameState.clickPower;
@@ -343,6 +395,9 @@ function handleCityClick(event) {
 
     // Create click feedback
     createClickFeedback(event.clientX, event.clientY);
+
+    // Play click sound
+    audioSystem.playSound('click');
 
     // Update UI
     updateCounters();
@@ -397,6 +452,9 @@ function createUpgradeAnimation(emoji) {
 // Start the game timer
 function startTimer() {
     gameState.timerInterval = setInterval(() => {
+        // Don't execute if the game is paused
+        if (gameState.isPaused) return;
+
         // Decrement time
         gameState.timeRemaining--;
 
@@ -527,6 +585,9 @@ function victory() {
     document.getElementById('victory-points').textContent = Math.floor(gameState.greenPoints);
     document.getElementById('victory-upgrades').textContent = gameState.totalUpgradesPurchased;
 
+    // Play victory sound
+    audioSystem.playSound('victory');
+
     // Show victory modal
     victoryModal.classList.add('active');
 }
@@ -542,8 +603,40 @@ function gameOver() {
     const percentage = Math.min(Math.round((1 - (gameState.co2 / gameState.initialCo2)) * 100), 100);
     document.getElementById('gameover-percentage').textContent = percentage;
 
+    // Play game over sound
+    audioSystem.playSound('gameOver');
+
     // Show gameover modal
     gameoverModal.classList.add('active');
+}
+
+// Pause the game
+function pauseGame() {
+    if (!gameState.gameActive || gameState.isPaused) return;
+
+    gameState.isPaused = true;
+
+    // Update pause modal with current stats
+    document.getElementById('pause-co2').textContent = Math.round(gameState.co2);
+    document.getElementById('pause-points').textContent = Math.floor(gameState.greenPoints);
+
+    const percentage = Math.min(Math.round((1 - (gameState.co2 / gameState.initialCo2)) * 100), 100);
+    document.getElementById('pause-percentage').textContent = percentage;
+
+    // Play pause sound
+    audioSystem.playSound('pause');
+
+    // Show pause modal
+    pauseModal.classList.add('active');
+}
+
+// Resume the game
+function resumeGame() {
+    gameState.isPaused = false;
+    pauseModal.classList.remove('active');
+
+    // Play resume sound
+    audioSystem.playSound('resume');
 }
 
 // Event Listeners
@@ -558,9 +651,32 @@ categoryButtons.forEach(button => {
     });
 });
 
+// Pause button
+pauseButton.addEventListener('click', pauseGame);
+
+// Resume button
+resumeButton.addEventListener('click', resumeGame);
+
+// Restart button in pause modal
+restartButton.addEventListener('click', () => {
+    pauseModal.classList.remove('active');
+    initGame();
+});
+
 // Play again buttons
 playAgainVictory.addEventListener('click', initGame);
 playAgainGameover.addEventListener('click', initGame);
+
+// Keyboard shortcut for pause/resume (Escape key)
+document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+        if (gameState.isPaused) {
+            resumeGame();
+        } else {
+            pauseGame();
+        }
+    }
+});
 
 // Initialize the game when the page loads
 window.addEventListener('DOMContentLoaded', initGame);

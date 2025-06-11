@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PlanetPlay - Contact</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+  <header>
+    <nav>
+      <ul>
+        <li><a href="index.html">Accueil</a></li>
+        <li><a href="quiz.html">Quiz</a></li>
+        <li><a href="game.html">Mini-jeu</a></li>
+        <li><a href="scores.html">Scores</a></li>
+        <li><a href="about.html">À propos</a></li>
+        <li><a href="faq.html">FAQ</a></li>
+        <li><a href="reflexivite.html">Réflexivité</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+  <main>
+    <section class="contact-section">
+      <h2>Contactez-nous</h2>
+      <form id="contact-form" autocomplete="off" novalidate>
+        <label for="name">Nom :</label>
+        <input type="text" id="name" name="name" required>
+        <label for="email">Email :</label>
+        <input type="email" id="email" name="email" required>
+        <label for="message">Message :</label>
+        <textarea id="message" name="message" rows="4" required></textarea>
+        <button type="submit" class="btn">Envoyer</button>
+      </form>
+      <div id="contact-success" style="display:none; color:#1DB954; margin-top:1rem; font-weight:bold;">Merci pour votre message !</div>
+    </section>
+  </main>
+  <footer>
+    <p>&copy; 2024 PlanetPlay. Sensibilisons ensemble !</p>
+  </footer>
+  <script src="../scripts/contact.js"></script>
+</body>
+</html> 
